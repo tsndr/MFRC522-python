@@ -67,3 +67,4 @@ cd ~
 git clone https://github.com/tsndr/MFRC522-python.git
 cd MFRC522-python/
 ```
+Everything set up, now you can start reading and writing RFID-Tags 😉
