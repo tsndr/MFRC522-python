@@ -3,7 +3,6 @@
 #!/usr/bin/env python
 import RPi.GPIO as GPIO
 import MFRC522
-import signal
 
 # Keys
 DEFAULT_KEY = [0xFF,0xFF,0xFF,0xFF,0xFF,0xFF]
@@ -18,6 +17,8 @@ def uid_to_num(uid):
     return n
 
 RFID = MFRC522.MFRC522()
+
+print "# RFID Wipe\n"
 
 print "Waiting for tag...\n"
 

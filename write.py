@@ -3,9 +3,6 @@
 #!/usr/bin/env python
 import RPi.GPIO as GPIO
 import MFRC522
-import signal
-import time
-import sys
 
 # Keys
 DEFAULT_KEY = [0xFF,0xFF,0xFF,0xFF,0xFF,0xFF]
@@ -23,6 +20,9 @@ def uid_to_num(uid):
     return n
 
 RFID = MFRC522.MFRC522()
+
+print "# RFID Writer\n"
+print "Info: Leave the sector field empty to exit.\n"
 
 # Get tag size if available
 (status, TagSize) = RFID.Request(RFID.PICC_REQIDL)
