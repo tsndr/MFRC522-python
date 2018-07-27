@@ -1,6 +1,6 @@
 # MFRC522-python
 
-Reading and Writing MiFare tags using a Raspberry Pi 3 and the RFID-RC522.
+Reading and Writing MiFare tags using a Raspberry Pi and the RFID-RC522.
 
 ## Usage
 Run one of these commands and follow the instructions:
