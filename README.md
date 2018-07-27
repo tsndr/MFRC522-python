@@ -21,6 +21,7 @@ IRQ   | -
 GND   | 6
 RST   | 22
 3.3V  | 1
+
 Dont connect the IRQ pin.
 
 For a detailed pinout plan check [this website](https://pinout.xyz/).
