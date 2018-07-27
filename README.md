@@ -33,7 +33,7 @@ In the menu select `5 Interfacing options`, then enable `P4 SPI` and reboot.
 Connect the RC522's Pins to the RaspberryPi's GPIO pins.
 
 RC522 | RaspberryPi
-----: | ----------:
+----- | -----------
 SDA   | 24
 SCK   | 23
 MOSI  | 19
