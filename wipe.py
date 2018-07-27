@@ -18,7 +18,7 @@ def uid_to_num(uid):
         n = n * 256 + uid[i]
     return n
 
-MIFAREReader = MFRC522.MFRC522()
+RFID = MFRC522.MFRC522()
 
 print "Waiting for tag...\n"
 
@@ -28,9 +28,9 @@ while True:
 
     while True:
 
-        (status, TagSize) = MIFAREReader.MFRC522_Request(MIFAREReader.PICC_REQIDL)
+        (status, TagSize) = RFID.Request(RFID.PICC_REQIDL)
 
-        if status != MIFAREReader.MI_OK:
+        if status != RFID.MI_OK:
             continue
 
         if sector >= TagSize:
@@ -43,24 +43,24 @@ while True:
         TrailerBlockAddr = (sector * 4 + 3)
 
         # Writing data
-        (status, UID) = MIFAREReader.MFRC522_Anticoll()
+        (status, UID) = RFID.Anticoll()
 
-        if status != MIFAREReader.MI_OK:
+        if status != RFID.MI_OK:
             break
 
-        MIFAREReader.MFRC522_SelectTag(UID)
-        status = MIFAREReader.MFRC522_Auth(MIFAREReader.PICC_AUTHENT1A, TrailerBlockAddr, KEY, UID)
-        if status == MIFAREReader.MI_OK:
+        RFID.SelectTag(UID)
+        status = RFID.Auth(RFID.PICC_AUTHENT1A, TrailerBlockAddr, KEY, UID)
+        if status == RFID.MI_OK:
             data = bytearray()
             data.extend(bytearray("".ljust(len(BlockAddrs) * 16)))
             i = 0
             for block_num in BlockAddrs:
-                MIFAREReader.MFRC522_Write(block_num, data[(i*16):(i+1)*16])
+                RFID.Write(block_num, data[(i*16):(i+1)*16])
                 i += 1
             print "Sector", sector, "wiped!"
         else:
             print "Can't access sector", sector, "!"
-        MIFAREReader.MFRC522_StopCrypto1()
+        RFID.StopCrypto1()
         sector += 1
 
     print "\nTag wiped!"
