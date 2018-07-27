@@ -2,14 +2,34 @@
 
 Reading and Writing MiFare tags using a Raspberry Pi 3 and the RFID-RC522.
 
-## 1. Enable SPI
+## Usage
+Run one of these commands and follow the instructions:
+
+#### Reading a tag
+```
+python read.py
+```
+
+#### Writing a tag
+```
+python write.py
+```
+
+#### Resetting a tag
+```
+python wipe.py
+```
+
+## Installation
+
+### 1. Enable SPI
 Open the configuration using this command:
 ```
 sudo raspi-config
 ```
 In the menu select `5 Interfacing options`, then enable `P4 SPI` and reboot.
 
-## 2. Connection
+### 2. Connection
 Connect the RC522's Pins to the RaspberryPi's GPIO pins.
 
 RC522 | RaspberryPi
@@ -27,7 +47,7 @@ Dont connect the IRQ pin.
 
 For a detailed pinout plan check [this website](https://pinout.xyz/).
 
-## Install dependencies
+### Install dependencies
 First of all we need to install the `git` and `python-dev` package using this command:
 ```
 sudo apt install git python-dev -y
@@ -40,28 +60,10 @@ cd SPI-Py/
 sudo python setup.py install
 ```
 
-## Install MFRC522-python
+### Install MFRC522-python
 Almost done, just a few commands left to install this package:
 ```
 cd ~
 git clone https://github.com/tsndr/MFRC522-python.git
 cd MFRC522-python/
-```
-
-## Usage
-Run one of these commands and follow the instructions:
-
-#### Reading a tag
-```
-python read.py
-```
-
-#### Writing a tag
-```
-python write.py
-```
-
-#### Resetting a tag
-```
-python wipe.py
 ```
