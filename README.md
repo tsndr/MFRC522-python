@@ -22,14 +22,14 @@ python wipe.py
 
 ## Installation
 
-### 1. Enable SPI
+### Enable SPI
 Open the configuration using this command:
 ```
 sudo raspi-config
 ```
 In the menu select `5 Interfacing options`, then enable `P4 SPI` and reboot.
 
-### 2. Connection
+### Wiring
 Connect the RC522's Pins to the RaspberryPi's GPIO pins.
 
 RC522 | RaspberryPi
