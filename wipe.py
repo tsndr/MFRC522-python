@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+from __future__ import print_function
 import RPi.GPIO as GPIO
 import MFRC522
 
@@ -16,9 +17,9 @@ def uid_to_num(uid):
 
 RFID = MFRC522.MFRC522()
 
-print "# RFID Wipe\n"
+print("# RFID Wipe\n")
 
-print "Waiting for tag...\n"
+print("Waiting for tag...\n")
 
 while True:
 
@@ -31,10 +32,18 @@ while True:
         if status != RFID.MI_OK:
             continue
 
-        if sector >= TagSize:
+        if TagSize < 1:
+            print("Can't read tag properly!")
             break
 
-        print "Wiping sector", sector, "..."
+        if sector >= TagSize:
+            break
+        
+        spacer = ""
+        if sector < 10:
+            spacer = " "
+
+        print("Wiping sector %s%s ... " % (spacer, sector), end="")
 
         # Selecting blocks
         BlockAddrs = [ (sector * 4), (sector * 4 + 1), (sector * 4 + 2) ]
@@ -55,13 +64,13 @@ while True:
             for block_num in BlockAddrs:
                 RFID.Write(block_num, data[(i*16):(i+1)*16])
                 i += 1
-            print "Sector", sector, "wiped!"
+            print("OK!")
         else:
-            print "Can't access sector", sector, "!"
+            print("NO ACCESS!")
         RFID.StopCrypto1()
         sector += 1
 
-    print "\nTag wiped!"
+    print("\nTag wiped!")
     break
 
 GPIO.cleanup()
