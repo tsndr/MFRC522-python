@@ -8,9 +8,6 @@ DEFAULT_KEY = [0xFF,0xFF,0xFF,0xFF,0xFF,0xFF]
 # Selecting key
 KEY = DEFAULT_KEY
 
-MainLoop = True
-WaitingForTag = True
-
 def uid_to_num(uid):
     n = 0
     for i in range(0, 5):
@@ -23,51 +20,64 @@ print "# RFID Reader\n"
 print "Info: Leave the sector field empty to exit.\n"
 
 # Get tag size if available
-(status, TagSize) = RFID.Request(RFID.PICC_REQIDL)
+(Status, TagSize) = RFID.Request(RFID.PICC_REQIDL)
 
-while MainLoop:
+while True:
+
     if TagSize > 0:
-        message = "Sector [1 - %s]: " % TagSize
+        message = "Sector [1 - %s]: " % (TagSize - 1)
     else:
         message = "Sector: "
 
     try:
-        sector = input(message)
+        Sector = input(message)
     except:
-        MainLoop = False
-        continue
+        print ""
+        break
     else:
-        if status != RFID.MI_OK:
-            print "Waiting for Tag...\n"
-        else:
-            print ""
-        WaitingForTag = True
+        print "Waiting for Tag...\n"
 
-    while WaitingForTag:
-        (status, TagSize) = RFID.Request(RFID.PICC_REQIDL)
+    while True:
 
-        if status != RFID.MI_OK:
+        (Status, TagSize) = RFID.Request(RFID.PICC_REQIDL)
+
+        if Status != RFID.MI_OK:
             continue
 
-        if sector < 1 or sector > (TagSize - 1):
+        if TagSize < 1:
+            print("Can't read tag properly!")
+            break
+
+        if Sector < 1 or Sector > (TagSize - 1):
             print "Sector out of range (1 - %s)\n" % (TagSize - 1)
-            WaitingForTag = False
-            continue
+            break
 
-        (status, UID) = RFID.Anticoll()
+        # Selecting blocks
+        BaseBlockLength = 4
+        if Sector < 32:
+            BlockLength = BaseBlockLength
+            StartAddr = Sector * BlockLength
+        else:
+            BlockLength = 16
+            StartAddr = 32 * BaseBlockLength + (Sector - 32) * BlockLength
 
-        if status != RFID.MI_OK:
-            continue
+        BlockAddrs = []
+        for i in range(0, (BlockLength - 1)):
+            BlockAddrs.append((StartAddr + i))
+        TrailerBlockAddr = (StartAddr + (BlockLength - 1))
 
+        # Initializing tag
+        (Status, UID) = RFID.Anticoll()
+
+        if Status != RFID.MI_OK:
+            break
+
+        # Reading sector
         RFID.SelectTag(UID)
-
-        # Reading data
-        BlockAddrs = [ (sector * 4), (sector * 4 + 1), (sector * 4 + 2) ]
-        TrailerBlockAddr = (sector * 4 + 3)
-        status = RFID.Auth(RFID.PICC_AUTHENT1A, TrailerBlockAddr, KEY, UID)
+        Status = RFID.Auth(RFID.PICC_AUTHENT1A, TrailerBlockAddr, KEY, UID)
         data = []
         text_read = ""
-        if status == RFID.MI_OK:
+        if Status == RFID.MI_OK:
             for block_num in BlockAddrs:
                 block = RFID.Read(block_num) 
                 if block:
@@ -77,9 +87,9 @@ while MainLoop:
             print "UID:  ", uid_to_num(UID)
             print "Data: ", text_read,"\n"
         else:
-            print "Can't access sector", sector, "!\n"
+            print "Can't access sector", Sector, "!\n"
         RFID.StopCrypto1()
+        break
 
-        WaitingForTag = False
-
+RFID.AntennaOff()
 GPIO.cleanup()
