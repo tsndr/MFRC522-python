@@ -8,9 +8,6 @@ DEFAULT_KEY = [0xFF,0xFF,0xFF,0xFF,0xFF,0xFF]
 # Selecting key
 KEY = DEFAULT_KEY
 
-MainLoop = True
-WaitingForTag = True
-
 def uid_to_num(uid):
     n = 0
     for i in range(0, 5):
@@ -25,52 +22,66 @@ print "Info: Leave the sector field empty to exit.\n"
 # Get tag size if available
 (status, TagSize) = RFID.Request(RFID.PICC_REQIDL)
 
-while MainLoop:
+while True:
     if TagSize > 0:
-        message = "Sector [1 - %s]: " % TagSize
+        message = "Sector [1 - %s]: " % (TagSize - 1)
     else:
         message = "Sector: "
 
     try:
-        sector = input(message)
+        Sector = input(message)
     except:
-        MainLoop = False
-        continue
+        print ""
+        break
     else:
+        if TagSize > 0:
+            if Sector >= 32:
+                MaxChars = 16 * 15
+            else:
+                MaxChars = 16 * 3
+            message = "Data [max %s chars]: " % MaxChars
+        else:
+            message = "Data: "
         try:
-            text = raw_input("Data: ")
+            text = raw_input(message)
         except:
+            print "\n"
             continue
         else:
-            if status != RFID.MI_OK:
-                print "Waiting for Tag...\n"
-            else:
-                print ""
-            WaitingForTag = True
+            print "Waiting for Tag...\n"
 
-    while WaitingForTag:
+    while True:
         (status, TagSize) = RFID.Request(RFID.PICC_REQIDL)
 
         if status != RFID.MI_OK:
             continue
 
-        if sector < 1 or sector > (TagSize - 1):
+        if Sector < 1 or Sector > (TagSize - 1):
             print "Sector out of range (1 - %s)\n" % (TagSize - 1)
-            WaitingForTag = False
-            continue
-
-        (status, UID) = RFID.Anticoll()
-
-        if status != RFID.MI_OK:
-            continue
-
-        RFID.SelectTag(UID)
+            break
 
         # Selecting blocks
-        BlockAddrs = [ (sector * 4), (sector * 4 + 1), (sector * 4 + 2) ]
-        TrailerBlockAddr = (sector * 4 + 3)
+        BaseBlockLength = 4
+        if Sector < 32:
+            BlockLength = BaseBlockLength
+            StartAddr = Sector * BlockLength
+        else:
+            BlockLength = 16
+            StartAddr = 32 * BaseBlockLength + (Sector - 32) * BlockLength
+
+        BlockAddrs = []
+        for i in range(0, (BlockLength - 1)):
+            BlockAddrs.append((StartAddr + i))
+        TrailerBlockAddr = (StartAddr + (BlockLength - 1))
+
+        # Initializing tag
+        (Status, UID) = RFID.Anticoll()
+
+        if Status != RFID.MI_OK:
+            break
 
         # Writing data
+        RFID.SelectTag(UID)
         status = RFID.Auth(RFID.PICC_AUTHENT1A, TrailerBlockAddr, KEY, UID)
         if status == RFID.MI_OK:
             data = bytearray()
@@ -82,9 +93,9 @@ while MainLoop:
             print "UID:  ", uid_to_num(UID)
             print "Data: ", text[0:(len(BlockAddrs) * 16)], "\n"
         else:
-            print "Can't access sector", sector, "!\n"
+            print "Can't access sector", Sector, "!\n"
         RFID.StopCrypto1()
+        break
 
-        WaitingForTag = False
-
+RFID.AntennaOff()
 GPIO.cleanup()
