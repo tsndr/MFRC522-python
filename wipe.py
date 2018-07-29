@@ -23,41 +23,53 @@ print("Waiting for tag...\n")
 
 while True:
 
-    sector = 1
+    Sector = 1
 
     while True:
 
-        (status, TagSize) = RFID.Request(RFID.PICC_REQIDL)
+        (Status, TagSize) = RFID.Request(RFID.PICC_REQIDL)
 
-        if status != RFID.MI_OK:
+        if Status != RFID.MI_OK:
             continue
 
         if TagSize < 1:
             print("Can't read tag properly!")
             break
 
-        if sector >= TagSize:
+        if Sector >= TagSize:
             break
-        
-        spacer = ""
-        if sector < 10:
-            spacer = " "
 
-        print("Wiping sector %s%s ... " % (spacer, sector), end="")
+        # Only for formatting
+        Spacer = ""
+        if Sector < 10:
+            Spacer = " "
+
+        print("Wiping sector %s%s ... " % (Spacer, Sector), end="")
 
         # Selecting blocks
-        BlockAddrs = [ (sector * 4), (sector * 4 + 1), (sector * 4 + 2) ]
-        TrailerBlockAddr = (sector * 4 + 3)
+        BaseBlockLength = 4
+        if Sector < 32:
+            BlockLength = BaseBlockLength
+            StartAddr = Sector * BlockLength
+        else:
+            BlockLength = 16
+            StartAddr = 32 * BaseBlockLength + (Sector - 32) * BlockLength
 
-        # Writing data
-        (status, UID) = RFID.Anticoll()
+        BlockAddrs = []
+        for i in range(0, (BlockLength - 1)):
+            BlockAddrs.append((StartAddr + i))
+        TrailerBlockAddr = (StartAddr + (BlockLength - 1))
 
-        if status != RFID.MI_OK:
+        # Initializing tag
+        (Status, UID) = RFID.Anticoll()
+
+        if Status != RFID.MI_OK:
             break
 
+        # Wiping sector
         RFID.SelectTag(UID)
-        status = RFID.Auth(RFID.PICC_AUTHENT1A, TrailerBlockAddr, KEY, UID)
-        if status == RFID.MI_OK:
+        Status = RFID.Auth(RFID.PICC_AUTHENT1A, TrailerBlockAddr, KEY, UID)
+        if Status == RFID.MI_OK:
             data = bytearray()
             data.extend(bytearray("".ljust(len(BlockAddrs) * 16)))
             i = 0
@@ -68,7 +80,7 @@ while True:
         else:
             print("NO ACCESS!")
         RFID.StopCrypto1()
-        sector += 1
+        Sector += 1
 
     print("\nTag wiped!")
     break
