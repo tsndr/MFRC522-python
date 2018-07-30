@@ -8,11 +8,11 @@ DEFAULT_KEY = [0xFF,0xFF,0xFF,0xFF,0xFF,0xFF]
 # Selecting key
 KEY = DEFAULT_KEY
 
-def uid_to_num(uid):
-    n = 0
-    for i in range(0, 5):
-        n = n * 256 + uid[i]
-    return n
+def format_uid(uid):
+    s = ""
+    for i in range(0, len(uid)):
+        s += "%x" % uid[i]
+    return s.upper()
 
 RFID = MFRC522.MFRC522()
 
@@ -84,7 +84,7 @@ while True:
                     data += block
             if data:
                 text_read = "".join(chr(i) for i in data)
-            print "UID:  ", uid_to_num(UID)
+            print "UID:  ", format_uid(UID)
             print "Data: ", text_read,"\n"
         else:
             print "Can't access sector", Sector, "!\n"
