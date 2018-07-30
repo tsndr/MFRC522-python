@@ -9,12 +9,6 @@ DEFAULT_KEY = [0xFF,0xFF,0xFF,0xFF,0xFF,0xFF]
 # Selecting key
 KEY = DEFAULT_KEY
 
-def uid_to_num(uid):
-    n = 0
-    for i in range(0, 5):
-        n = n * 256 + uid[i]
-    return n
-
 RFID = MFRC522.MFRC522()
 
 print("# RFID Wipe\n")
