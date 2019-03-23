@@ -108,7 +108,7 @@ class MFRC522:
     serNum = []
     
     def __init__(self, dev='/dev/spidev0.0', spd=1000000):
-        spi.openSPI(device=dev,speed=spd)
+        self.service=spi.openSPI(device=dev,speed=spd)
         GPIO.setmode(GPIO.BCM)
         GPIO.setup(25, GPIO.OUT)
         GPIO.output(self.NRSTPD, 1)
@@ -118,10 +118,10 @@ class MFRC522:
         self.Write_MFRC522(self.CommandReg, self.PCD_RESETPHASE)
     
     def Write_MFRC522(self, addr, val):
-        spi.transfer(((addr<<1)&0x7E,val))
+        spi.transfer(self.service,((addr<<1)&0x7E,val))
     
-    def Read_MFRC522(self, addr):
-        val = spi.transfer((((addr<<1)&0x7E) | 0x80,0))
+    def Read_MFRC522(self, addr, val):
+        val = spi.transfer(self.service,(((addr<<1)&0x7E) | 0x80,0))
         return val[1]
     
     def SetBitMask(self, reg, mask):
